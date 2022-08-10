@@ -1,0 +1,10 @@
+version: '3.5'
+
+services:
+  db_cars:
+    container_name: db_cars
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=mysecretpassword14
+    image: postgres:14.4-alpine3.16
