@@ -8,17 +8,17 @@ export interface CarEntity {
 }
 export interface CreateCarEntity extends Omit<CarEntity, "carGuid"> {}
 
-export interface RentalCarEntity extends Omit<CarEntity, 'carGuid' | 'isActive' | 'licensePlate'> {
+export interface RentalCarEntity {
   guid: string;
+  licensePlate: string,
   rentPrice: number;
   rentalStartedAt: Date;
   rentalEndAt: Date;
+  updateAt: Date;
+  createdAt: Date;
 }
 
-export interface CreateRentalCarOrderEntity extends Omit<RentalCarEntity, "guid"> {
-  carGuid: string;
-}
-
+export interface CreateRentalCarOrderEntity extends Omit<RentalCarEntity, "guid" | "rentPrice" | "createdAt" | "updateAt"> { }
 
 export interface UpdateCarEntity extends Omit<CarEntity, 'updatedAt' | 'createdAt'> { }
 

@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CreateCarsDto } from './cars.dto';
+import { CreateCarsDto, CreateRentCarOrderDto } from './cars.dto';
 import { CarsRepository } from './cars.repository';
 import { CarsService } from './cars.service';
 
@@ -14,13 +14,18 @@ export class CarsController {
     ) {}
 
   @Get()
-  async func() {
-    const test = await this.repository.findOne("fe3d000c-b574-4b3d-9f5e-9c5c4be2aa38")
-    console.log(test)
+  findAll() {
+    
   }
+
   @ApiOperation({ summary: '' })
   @Post()
   getDtoCars(@Body() dto: CreateCarsDto) {
-    return this.cars.PostReq()
+  }
+
+  @ApiOperation({ summary: '' })
+  @Post("create")
+  async createOrder(@Body() dto: CreateRentCarOrderDto) {
+    await this.cars.createSessionRentCar(dto)
   }
 }

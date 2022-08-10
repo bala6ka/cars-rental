@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { DISCONT } from 'src/constants/constants';
-import { GetCarForRentDto } from './cars.dto';
+import { DISCOUNTED_AMOUNT, DISCOUNT_PER_DAYS } from 'src/constants/constants';
+import { CreateRentCarOrderDto, GetCarForRentDto } from './cars.dto';
 import { CarsRepository } from './cars.repository';
 
 @Injectable()
@@ -18,64 +18,74 @@ export class CarsService {
     await this.repository.createRentalCarsTable()
   }
 
-  async carsIsActive(carGuid: string) {
-    const car = await this.repository.findOneByGuid(carGuid)
-    if (!car) {
-      this.logger.error("Car not found")
-    }
-    return car
+  async calculationPriceRentByPeriod(dateRentStart: Date, dateRentEnd: Date) {
+    let sumDays = await this.getSumDays(dateRentStart, dateRentEnd)
+    const daysBuckets = DISCOUNT_PER_DAYS
+    .reduce((acc, { from, to, discount }) => {
+      if (sumDays < from) {
+        return acc
+      }
+      if (sumDays >= to) {
+       return [...acc, [to - from, discount]]
+      }
+      if (sumDays > from) {
+       return [...acc, [sumDays - from, discount]];
+      }
+      return [...acc, [sumDays - from, discount]];
+     }, [])
+     .reduce((acc, [sumDays, discount]) => {
+      return acc + sumDays * ( DISCOUNTED_AMOUNT.BASE * (1 - discount / 100));
+     }, 0);
+    return daysBuckets;
   }
 
-  async isRentAvailable(carGuid: string) {
-    const car = await this.repository.findOneByGuid(carGuid);
+  async carsIsActive(licensePlate: string) {
+    const car = await this.repository.findOneCar(licensePlate)
     if (!car) {
       this.logger.error("Car not found")
+      return
     }
-    const date = new Date(car).getDate()
-    const dateNow = new Date().getDate()
-    const sumDaysSinceLastRental = date + dateNow
-    if (sumDaysSinceLastRental >= 3) {
+    return true
+  }
+
+  async  checkWeekDay(dateStart: Date, dateEnd: Date,) {
+    const dayOfWeekTo = new Date(dateStart).getDay()
+    const dayOfWeekFrom = new Date(dateEnd).getDay()
+    if(dayOfWeekTo === 0 || dayOfWeekTo === 6) {
+      return false
+    } else if (dayOfWeekFrom === 0 || dayOfWeekFrom === 6) {
+      return false
+    }
       return true
-    }
-    this.logger.error("The car was delivered less than 3 days ago, please choose another")
   }
 
-  calculationCostRentByPeriod(rentPeriod: { dateStart: string, dateEnd: string }) {
-    let dateStart = new Date(rentPeriod.dateStart).getDate()
-    let dateEnd = new Date(rentPeriod.dateEnd).getDate()
-    let totalDays = dateStart + dateEnd
-    let cost = 1000
-
-    if (totalDays <= 4) {
-      return cost;
-    }
-
-    if (totalDays >= 5 && totalDays <= 9) {
-      return cost = (cost / 100 * DISCONT.MEDIUM)
-    }
-
-    if (totalDays >= 10 && totalDays <= 17) {
-      return cost = (cost / 100 * DISCONT.GOLD)
-    }
-
-    if (totalDays >= 18 && totalDays <= 29) {
-      return cost = (cost / 100 * DISCONT.PLATINUM)
-    }
+  async getSumDays(dateStart: Date, dateEnd: Date) {
+    const oneDay = 1000 * 60 * 60 * 24;
+    const getTime = new Date(dateEnd).getTime() - new Date(dateStart).getTime()
+    const getDays = Math.round(getTime / oneDay);
+    return getDays + 1
   }
 
-  async getCarForRent(dto: GetCarForRentDto) {
-   const car = await this.repository.findOneByLicensePlate(dto.licensePlate)
-   if(!car) {
-     this.logger.error("Car not found")
-   }
-   const checkCarAvailability = await this.isRentAvailable(car.car_guid)
+  async createSessionRentCar(dto: GetCarForRentDto) {
+    const car = await this.repository.findOneCar(dto.licensePlate)
+    if(!car) {
+      this.logger.error("The car not found")
+      return "The car not found"
+    }
+    const isWeekend = await this.checkWeekDay(dto.rentalStartedAt, dto.rentalEndAt)
+    if(!isWeekend) return
 
-   if(checkCarAvailability) {
-     const rentPeriod ={
-       dateStart: dto.rentalStartedAt,
-       dateEnd: dto.rentalEndAt
-     }
-     const price = await this.calculationCostRentByPeriod({rentPeriod})
-   }
+    const isActive = await this.carsIsActive(dto.licensePlate)
+    if(isActive) {
+      const amountDays = await this.getSumDays(car.rental_end_at, dto.rentalStartedAt)
+      const days = Math.abs(amountDays)
+      if (days > 3) {
+       const rentalPrice =  await this.calculationPriceRentByPeriod(dto.rentalStartedAt, dto.rentalEndAt)
+       await this.repository.createRentalCarOrder(dto, rentalPrice)
+      } else {
+        this.logger.log("The car was delivered less than 3 days ago, please choose another")
+        return "The car was delivered less than 3 days ago, please choose another"
+      }
+    }
   }
 }

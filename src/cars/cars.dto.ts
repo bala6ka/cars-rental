@@ -15,3 +15,14 @@ export class GetCarForRentDto {
   @ApiProperty()
   rentalEndAt: Date;
 }
+
+export class CreateRentCarOrderDto {
+  @ApiProperty()
+  licensePlate: string;
+  @ApiProperty()
+  rentPrice: number;
+  @ApiProperty()
+  rentalStartedAt: Date;
+  @ApiProperty()
+  rentalEndAt: Date;
+}

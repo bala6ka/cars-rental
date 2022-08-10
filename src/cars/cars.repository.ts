@@ -27,10 +27,11 @@ export class CarsRepository {
       `CREATE TABLE rental_cars 
           (
             guid uuid,
-            car_guid uuid,
+            license_plate VARCHAR(255),
             rent_price NUMERIC,
             rental_started_at TIMESTAMP,
             rental_end_at TIMESTAMP,
+            update_at TIMESTAMP,
             created_at TIMESTAMP,
             PRIMARY KEY ("guid")
           )`,
@@ -47,33 +48,35 @@ export class CarsRepository {
         '${uuid}', 
         '${dto.licensePlate}', 
         '${dto.isActive}', 
-        '${new Date(dto.updatedAt).toUTCString()}', 
+        '${new Date(dto.updatedAt).toUTCString()}',
         '${new Date(dto.createdAt).toUTCString()}')`
     )
   }
 
-  async createRentalCarOrder(dto: CreateRentalCarOrderEntity) {
+  async createRentalCarOrder(dto: CreateRentalCarOrderEntity, rentalPrice: number) {
     const uuid = uuidv4()
-    const car = await this.findOneByGuid(dto.carGuid)
-    if(!car) {
-      this.logger.error(`Failed to create a booking for this car number, the car is not in the database`)
-    }
-
     await this.db.query(
       `INSERT INTO rental_cars
-      (guid, car_guid, rent_price, rental_started_at, rental_end_at, created_at)
+      (guid, license_plate, rent_price, rental_started_at, rental_end_at, update_at, created_at)
       VALUES
-      ('${uuid}', '${uuid}', '${dto.rentPrice}', '${new Date(dto.rentalStartedAt).toUTCString()}', '${dto.rentPrice}', '${new Date(dto.updatedAt).toUTCString()}', '${new Date(dto.createdAt).toUTCString()}')`
+      (
+        '${uuid}',
+        '${dto.licensePlate}',
+        '${rentalPrice}', 
+        '${new Date(dto.rentalStartedAt).toUTCString()}', 
+        '${new Date(dto.rentalEndAt).toUTCString()}',  
+        '${new Date().toUTCString()}'),
+        '${new Date().toUTCString()}')`
     )
   }
 
-  async findOneByGuid(carGuid: string) {
-    const response = this.db.query(`SELECT * FROM cars WHERE car_guid = '${carGuid}'`)
+  async findOneCar(licensePlate: string) {
+    const response = await this.db.query(`SELECT * FROM cars WHERE license_plate = '${licensePlate}'`)
     return response.rows[0]
   }
 
-  async findOneByLicensePlate(licensePlate: string) {
-    const response = this.db.query(`SELECT * FROM cars WHERE license_plate = '${licensePlate}'`)
+  async findOneRecordRent(licensePlate: string) {
+    const response = await this.db.query(`SELECT * FROM rental_cars WHERE license_plate = '${licensePlate}'`)
     return response.rows[0]
   }
 
