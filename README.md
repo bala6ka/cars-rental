@@ -8,10 +8,10 @@ Link for documentation - https://docs.nestjs.com/
 
 Running the app
 
-#start dependencies
+# start dependencies
 docker-compose up
+# development
 
-#for starting
 npm i
 
 npm run start
