@@ -15,3 +15,5 @@ docker-compose up
 npm i
 
 npm run start
+
+Go to - http://localhost:3000/
