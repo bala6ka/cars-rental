@@ -1,28 +1,40 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { RentalCarDetails } from './cars.entity';
 
-export class CreateCarsDto {
-  @ApiProperty()
-  id: string;
-  @ApiProperty()
-  cars_color: string;
-}
-
-export class GetCarForRentDto {
+export class CreateCarDto {
   @ApiProperty()
   licensePlate: string;
+  @ApiProperty()
+  isActive: Boolean;
+}
+
+export class CreateCarRentalSessionDto {
+  @ApiProperty()
+  licensePlate: string;
+  @ApiProperty()
+  details: RentalCarDetails;
   @ApiProperty()
   rentalStartedAt: Date;
   @ApiProperty()
   rentalEndAt: Date;
 }
 
-export class CreateRentCarOrderDto {
+export class UpdateCarRentalSessionDto {
   @ApiProperty()
   licensePlate: string;
   @ApiProperty()
-  rentPrice: number;
+  rentalPrice?: string;
   @ApiProperty()
-  rentalStartedAt: Date;
+  isActive?: string;
   @ApiProperty()
-  rentalEndAt: Date;
+  rentalStartedAt?: Date;
+  @ApiProperty()
+  rentalEndAt?: Date;
+}
+
+export class UpdateCarDto {
+  @ApiProperty({
+    type: String,
+  })
+  licensePlate: string;
 }

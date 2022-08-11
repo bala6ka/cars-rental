@@ -6,22 +6,34 @@ export interface CarEntity {
   updatedAt: Date;
   createdAt: Date;
 }
-export interface CreateCarEntity extends Omit<CarEntity, "carGuid"> {}
 
 export interface RentalCarEntity {
   guid: string;
   licensePlate: string,
-  rentPrice: number;
+  rentCost: number;
+  details: RentalCarDetails,
   rentalStartedAt: Date;
   rentalEndAt: Date;
-  updateAt: Date;
+  updatedAt: Date;
   createdAt: Date;
 }
 
-export interface CreateRentalCarOrderEntity extends Omit<RentalCarEntity, "guid" | "rentPrice" | "createdAt" | "updateAt"> { }
+export interface CreateCarEntity extends Omit<CarEntity, 'carGuid' | 'updatedAt' | 'createdAt'> {}
 
-export interface UpdateCarEntity extends Omit<CarEntity, 'updatedAt' | 'createdAt'> { }
+export interface CreateCarRentalSessionEntity extends Omit<RentalCarEntity, 'guid' | 'rentCost' | 'createdAt' | 'updatedAt'> { }
 
-export interface UpdateRentalCarEntity extends Omit<RentalCarEntity, 'guid' | 'rentalStartedAt' | 'updatedAt' | 'createdAt'> {
+export interface UpdateCarEntity {
+  licensePlate: string;
+  isActive: Boolean;
+}
+export interface UpdateRentalCarEntity {
+  licensePlate: string,
+  rentCost?: number;
+  details?: RentalCarDetails,
   rentalStartedAt?: Date;
+  rentalEndAt?: Date;
+}
+
+export interface RentalCarDetails {
+  sessionNumber: string
 }

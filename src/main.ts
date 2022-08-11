@@ -7,9 +7,9 @@ async function bootstrap() {
 
   const config = new DocumentBuilder()
     .setTitle('Cars')
-    .setDescription('The API for testing srevice rent cars')
+    .setDescription('The API for testing srevice rental cars')
     .setVersion('1.0')
-    .addTag('cars')
+    .addTag('Cars rental')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('/', app, document);

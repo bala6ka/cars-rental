@@ -9,7 +9,7 @@ export const DB_CONFIG = {
   port: process.env.DB_PORT,
 }
 
-export const DISCOUNTED_AMOUNT = {
+export const BASE_COST = {
   BASE: 1000,
 }
 
