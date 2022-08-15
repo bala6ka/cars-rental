@@ -28,7 +28,6 @@ export interface UpdateCarEntity {
 }
 export interface UpdateRentalCarEntity {
   licensePlate: string,
-  rentCost?: number;
   details?: RentalCarDetails,
   rentalStartedAt?: Date;
   rentalEndAt?: Date;

@@ -1,22 +1,21 @@
 import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
-import { ApiCreatedResponse, ApiFoundResponse, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { CreateCarDto, CreateCarRentalSessionDto } from './cars.dto';
-import { CarsRepository } from './cars.repository';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { CreateCarDto, CreateCarRentalSessionDto, UpdateCarDto, UpdateCarRentalSessionDto } from './cars.dto';
 import { CarsService } from './cars.service';
 
 
 @ApiTags('Cars rental')
-@Controller('cars')
+@Controller('')
 export class CarsController {
   constructor(
     private readonly carService: CarsService,
-    private readonly repository: CarsRepository
     ) {}
   
-  @ApiOperation({ summary: 'Test' })
-  @Get()
-  findAll() {
-    this.carService.getSumDays(new Date('2022-01-01'), new Date('2022-01-05'))
+  @ApiOperation({ summary: 'Create tables for app' })
+  @Get('/create')
+  async createTables() {
+    await this.carService.createCarsTable()
+    await this.carService.createRentalCarsTable()
   }
   
   @ApiOperation({ summary: 'Get one car by license plate.' })
@@ -37,24 +36,27 @@ export class CarsController {
     return this.carService.createSessionRentalCar(dto)
   }
 
-  // @ApiOperation({ summary: '' })
-  // @Put(':id')
-  // update(@Param('id') id: string, @Body() dto: Update) {
-  //   return 
-  // }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return 
+  @ApiOperation({ summary: 'For update car' })
+  @Put('/update/car')
+  async updateCar(@Body() dto: UpdateCarDto) {
+    return await this.carService.updateCar(dto)
   }
 
-  // @ApiOperation({ summary: '' })
-  // @ApiResponse({ status: 201, description: 'The record has been successfully created.'})
-  // @ApiResponse({ status: 403, description: 'Forbidden.'})
-  // @Post()
-  // getDtoCars(@Body() dto: CreateCarDto) {
-  //   return this.repository.createCar()
-  // }
+  @ApiOperation({ summary: 'For update session' })
+  @Put('/update/session')
+  async updateSession( @Body() dto: UpdateCarRentalSessionDto) {
+    return await this.carService.updateCarRentalSession(dto)
+  }
 
+  @ApiOperation({ summary: 'For delete car' })
+  @Delete('cars/:license_plate')
+  removeCar(@Param('license_plate') license_plate: string) {
+    return  this.carService.deleteCar(license_plate)
+  }
 
+  @ApiOperation({ summary: 'For delete session' })
+  @Delete('cars/session/:license_plate')
+  removeSession(@Param('license_plate') license_plate: string) {
+    return  this.carService.deleteCarRentalSession(license_plate)
+  }
 }

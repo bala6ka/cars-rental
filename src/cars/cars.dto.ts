@@ -23,9 +23,7 @@ export class UpdateCarRentalSessionDto {
   @ApiProperty()
   licensePlate: string;
   @ApiProperty()
-  rentalPrice?: string;
-  @ApiProperty()
-  isActive?: string;
+  details: RentalCarDetails;
   @ApiProperty()
   rentalStartedAt?: Date;
   @ApiProperty()
@@ -33,8 +31,8 @@ export class UpdateCarRentalSessionDto {
 }
 
 export class UpdateCarDto {
-  @ApiProperty({
-    type: String,
-  })
+  @ApiProperty()
   licensePlate: string;
+  @ApiProperty()
+  isActive: Boolean;
 }
